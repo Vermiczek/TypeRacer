@@ -1,14 +1,20 @@
 import { createClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-const WORD_COUNT = 10;
+const DEFAULT_WORD_COUNT = 20;
+const MIN_WORD_COUNT = 5;
+const MAX_WORD_COUNT = 50;
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const raw = request.nextUrl.searchParams.get("count");
+  const parsed = raw ? parseInt(raw, 10) : DEFAULT_WORD_COUNT;
+  const count = Number.isNaN(parsed)
+    ? DEFAULT_WORD_COUNT
+    : Math.min(MAX_WORD_COUNT, Math.max(MIN_WORD_COUNT, parsed));
+
   const supabase = await createClient();
 
-  const { data, error } = await supabase.rpc("get_random_words", {
-    count: WORD_COUNT,
-  });
+  const { data, error } = await supabase.rpc("get_random_words", { count });
 
   if (error || !data?.length) {
     return NextResponse.json(
