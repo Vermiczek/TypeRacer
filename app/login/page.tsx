@@ -24,7 +24,7 @@ type SignInValues = z.infer<typeof signInSchema>;
 type SignUpValues = z.infer<typeof signUpSchema>;
 type Mode = "signin" | "signup";
 
-export default function LoginPage() {
+const LoginPage = () => {
   const router = useRouter();
   const supabase = createClient();
   const [mode, setMode] = useState<Mode>("signin");
@@ -41,15 +41,15 @@ export default function LoginPage() {
 
   const activeForm = mode === "signin" ? signInForm : signUpForm;
 
-  function switchMode(next: Mode) {
+  const switchMode = (next: Mode) => {
     setMode(next);
     setServerError(null);
     setSuccessMessage(null);
     signInForm.reset();
     signUpForm.reset();
-  }
+  };
 
-  async function onSignIn(values: SignInValues) {
+  const onSignIn = async (values: SignInValues) => {
     setServerError(null);
     const { error } = await supabase.auth.signInWithPassword(values);
     if (error) {
@@ -58,9 +58,9 @@ export default function LoginPage() {
     }
     router.push("/");
     router.refresh();
-  }
+  };
 
-  async function onSignUp(values: SignUpValues) {
+  const onSignUp = async (values: SignUpValues) => {
     setServerError(null);
     const { error } = await supabase.auth.signUp({
       email: values.email,
@@ -72,7 +72,7 @@ export default function LoginPage() {
       return;
     }
     setSuccessMessage("Check your email to confirm your account.");
-  }
+  };
 
   const isSubmitting = activeForm.formState.isSubmitting;
 
@@ -175,9 +175,9 @@ export default function LoginPage() {
       </div>
     </div>
   );
-}
+};
 
-// ── Small reusable pieces ────────────────────────────────────────────────────
+export default LoginPage;
 
 type FieldProps = {
   label: string;
@@ -189,7 +189,7 @@ type FieldProps = {
   error?: string;
 };
 
-function Field({ label, id, type, placeholder, autoComplete, registration, error }: FieldProps) {
+const Field = ({ label, id, type, placeholder, autoComplete, registration, error }: FieldProps) => {
   return (
     <div>
       <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-zinc-300">
@@ -208,9 +208,9 @@ function Field({ label, id, type, placeholder, autoComplete, registration, error
       {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
     </div>
   );
-}
+};
 
-function Feedback({ error, success }: { error: string | null; success: string | null }) {
+const Feedback = ({ error, success }: { error: string | null; success: string | null }) => {
   if (error)
     return (
       <p className="rounded-lg border border-red-800 bg-red-900/30 px-3 py-2 text-sm text-red-400">
@@ -224,9 +224,9 @@ function Feedback({ error, success }: { error: string | null; success: string | 
       </p>
     );
   return null;
-}
+};
 
-function SubmitButton({ loading, label }: { loading: boolean; label: string }) {
+const SubmitButton = ({ loading, label }: { loading: boolean; label: string }) => {
   return (
     <button
       type="submit"
@@ -236,4 +236,4 @@ function SubmitButton({ loading, label }: { loading: boolean; label: string }) {
       {loading ? "Loading..." : label}
     </button>
   );
-}
+};

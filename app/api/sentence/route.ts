@@ -5,7 +5,7 @@ const DEFAULT_WORD_COUNT = 20;
 const MIN_WORD_COUNT = 5;
 const MAX_WORD_COUNT = 50;
 
-export async function GET(request: NextRequest) {
+export const GET = async (request: NextRequest) => {
   const raw = request.nextUrl.searchParams.get("count");
   const parsed = raw ? parseInt(raw, 10) : DEFAULT_WORD_COUNT;
   const count = Number.isNaN(parsed)

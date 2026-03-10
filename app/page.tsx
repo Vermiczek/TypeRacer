@@ -28,7 +28,7 @@ const MENU_ITEMS = [
   },
 ] as const;
 
-export default async function HomePage() {
+const HomePage = async () => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -111,4 +111,6 @@ export default async function HomePage() {
       </main>
     </div>
   );
-}
+};
+
+export default HomePage;

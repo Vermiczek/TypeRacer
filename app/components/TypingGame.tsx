@@ -29,7 +29,7 @@ type GameStatus = "idle" | "playing" | "finished";
 
 const WORDS_PER_LINE = 7;
 
-export default function TypingGame({
+const TypingGame = ({
   sentence,
   onComplete,
   onTyped,
@@ -38,7 +38,7 @@ export default function TypingGame({
   resultActions,
   bestWpm = 0,
   newBest = false,
-}: TypingGameProps) {
+}: TypingGameProps) => {
   const [typed, setTyped] = useState("");
   const [status, setStatus] = useState<GameStatus>("idle");
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -176,7 +176,7 @@ export default function TypingGame({
             const isCurrent = offset === 0;
             return (
               <p
-                key={lineIdx}
+                key={offset}
                 className={`font-mono text-xl leading-relaxed tracking-wide transition-opacity duration-150 ${
                   isCurrent ? "opacity-100" : "opacity-25"
                 }`}
@@ -243,9 +243,11 @@ export default function TypingGame({
       )}
     </div>
   );
-}
+};
 
-function StatCard({
+export default TypingGame;
+
+const StatCard = ({
   label,
   value,
   sub,
@@ -255,7 +257,7 @@ function StatCard({
   value: string | number;
   sub?: string;
   highlight?: boolean;
-}) {
+}) => {
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-center">
       <p className="mb-1 text-xs uppercase tracking-widest text-zinc-500">{label}</p>
@@ -267,4 +269,4 @@ function StatCard({
       {sub && <p className="mt-1 text-xs text-zinc-500">{sub}</p>}
     </div>
   );
-}
+};

@@ -7,7 +7,7 @@ const schema = z.object({
   accuracy: z.number().min(0).max(1),
 });
 
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   const supabase = await createClient();
 
   const {
@@ -27,7 +27,6 @@ export async function POST(request: NextRequest) {
 
   const { wpm, accuracy } = parsed.data;
 
-  // Fetch current stats to compute new rolling average
   const { data: player, error: fetchError } = await supabase
     .from("players")
     .select("games_played, best_wpm, avg_accuracy")

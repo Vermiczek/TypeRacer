@@ -2,16 +2,16 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import SinglePlayerGame from "./SinglePlayerGame";
 
-async function fetchSentence(): Promise<string> {
+const fetchSentence = async (): Promise<string> => {
   const supabase = await createClient();
   const { data } = await supabase.rpc("get_random_words", { count: 20 });
   if (!data?.length) return "The quick brown fox jumps over the lazy dog.";
   return (
     (data as string[]).join(" ").replace(/^\w/, (c) => c.toUpperCase()) + "."
   );
-}
+};
 
-export default async function SinglePlayerPage() {
+const SinglePlayerPage = async () => {
   const supabase = await createClient();
 
   const {
@@ -38,4 +38,6 @@ export default async function SinglePlayerPage() {
       bestWpm={player?.best_wpm ?? 0}
     />
   );
-}
+};
+
+export default SinglePlayerPage;

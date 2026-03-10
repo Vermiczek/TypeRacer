@@ -10,11 +10,11 @@ interface Props {
   bestWpm: number;
 }
 
-export default function SinglePlayerGame({
+const SinglePlayerGame = ({
   initialSentence,
   username,
   bestWpm: initialBestWpm,
-}: Props) {
+}: Props) => {
   const [sentence, setSentence] = useState(initialSentence);
   const [resetKey, setResetKey] = useState(0);
   const [wordCount, setWordCount] = useState(20);
@@ -29,7 +29,7 @@ export default function SinglePlayerGame({
       const data = await res.json();
       setSentence(data.sentence);
     } catch {
-      // keep current sentence
+      // Keep old sentence
     }
     setNewBest(false);
     setResetKey((k) => k + 1);
@@ -138,4 +138,6 @@ export default function SinglePlayerGame({
       </main>
     </div>
   );
-}
+};
+
+export default SinglePlayerGame;
