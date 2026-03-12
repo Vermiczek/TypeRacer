@@ -6,6 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import ThemeToggle from "@/app/components/ThemeToggle";
+import Field from "./components/Field";
+import Feedback from "./components/Feedback";
+import SubmitButton from "./components/SubmitButton";
+import PasswordStrengthBar from "./components/PasswordStrengthBar";
 
 const signInSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -77,20 +82,23 @@ const LoginPage = () => {
   const isSubmitting = activeForm.formState.isSubmitting;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm px-4">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-white">
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
             TypeRacer
           </h1>
-          <p className="mt-2 text-sm text-zinc-400">
+          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
             Real-time typing competition
           </p>
         </div>
 
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-8 shadow-xl">
+        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 p-8 shadow-xl dark:shadow-none">
           {/* Mode toggle */}
-          <div className="mb-6 flex rounded-lg bg-zinc-800 p-1">
+          <div className="mb-6 flex rounded-lg bg-zinc-200 dark:bg-zinc-800 p-1">
             {(["signin", "signup"] as Mode[]).map((m) => (
               <button
                 key={m}
@@ -98,8 +106,8 @@ const LoginPage = () => {
                 onClick={() => switchMode(m)}
                 className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${
                   mode === m
-                    ? "bg-white text-zinc-900"
-                    : "text-zinc-400 hover:text-white"
+                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+                    : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
                 }`}
               >
                 {m === "signin" ? "Sign in" : "Sign up"}
@@ -167,6 +175,7 @@ const LoginPage = () => {
                 registration={signUpForm.register("password")}
                 error={signUpForm.formState.errors.password?.message}
               />
+              <PasswordStrengthBar password={signUpForm.watch("password") ?? ""} />
               <Feedback error={serverError} success={successMessage} />
               <SubmitButton loading={isSubmitting} label="Create account" />
             </form>
@@ -178,62 +187,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-
-type FieldProps = {
-  label: string;
-  id: string;
-  type: string;
-  placeholder: string;
-  autoComplete?: string;
-  registration: ReturnType<ReturnType<typeof useForm>["register"]>;
-  error?: string;
-};
-
-const Field = ({ label, id, type, placeholder, autoComplete, registration, error }: FieldProps) => {
-  return (
-    <div>
-      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-zinc-300">
-        {label}
-      </label>
-      <input
-        id={id}
-        type={type}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        {...registration}
-        className={`w-full rounded-lg border bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 outline-none transition focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-          error ? "border-red-600" : "border-zinc-700"
-        }`}
-      />
-      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
-    </div>
-  );
-};
-
-const Feedback = ({ error, success }: { error: string | null; success: string | null }) => {
-  if (error)
-    return (
-      <p className="rounded-lg border border-red-800 bg-red-900/30 px-3 py-2 text-sm text-red-400">
-        {error}
-      </p>
-    );
-  if (success)
-    return (
-      <p className="rounded-lg border border-green-800 bg-green-900/30 px-3 py-2 text-sm text-green-400">
-        {success}
-      </p>
-    );
-  return null;
-};
-
-const SubmitButton = ({ loading, label }: { loading: boolean; label: string }) => {
-  return (
-    <button
-      type="submit"
-      disabled={loading}
-      className="mt-2 w-full rounded-lg bg-indigo-600 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      {loading ? "Loading..." : label}
-    </button>
-  );
-};

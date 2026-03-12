@@ -16,8 +16,7 @@ export const POST = async (
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  // Only host can start
+  
   const { data: room, error: roomError } = await supabase
     .from("rooms")
     .select("host_id, status, word_count")

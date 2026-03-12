@@ -34,7 +34,6 @@ export const GET = async () => {
     return NextResponse.json({ error: "Failed to fetch rooms" }, { status: 500 });
   }
 
-  // Never expose the hash — replace with a boolean
   const rooms = (data ?? []).map(({ password_hash, ...room }) => ({
     ...room,
     has_password: password_hash !== null,
@@ -62,11 +61,9 @@ export const POST = async (request: NextRequest) => {
   }
 
   const { name, maxPlayers, isRanked, timeLimit, password } = parsed.data;
-  // Ranked rooms always use 50 words
   const wordCount = isRanked ? 50 : parsed.data.wordCount;
   const password_hash = password ? hashPassword(password) : null;
 
-  // Create the room
   const { data: room, error: roomError } = await supabase
     .from("rooms")
     .insert({ name, host_id: user.id, max_players: maxPlayers, word_count: wordCount, time_limit: timeLimit, password_hash, is_ranked: isRanked })
@@ -77,7 +74,6 @@ export const POST = async (request: NextRequest) => {
     return NextResponse.json({ error: "Failed to create room" }, { status: 500 });
   }
 
-  // Auto-join as host
   await supabase
     .from("room_players")
     .insert({ room_id: room.id, player_id: user.id });

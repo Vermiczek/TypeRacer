@@ -17,15 +17,12 @@ export const DELETE = async (
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Remove player from the room
   await supabase
     .from("room_players")
     .delete()
     .eq("room_id", roomId)
     .eq("player_id", user.id);
 
-  // Only mark a *playing* room as finished when it empties — a waiting room
-  // with 0 players just sits idle so the host can refresh without losing it.
   const { data: room } = await supabase
     .from("rooms")
     .select("status")

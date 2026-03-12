@@ -5,24 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
-
-interface RoomPlayer {
-  count: number;
-}
-
-interface Room {
-  id: string;
-  name: string;
-  status: "waiting" | "playing" | "finished";
-  max_players: number;
-  word_count: number;
-  time_limit: number | null;
-  is_ranked: boolean;
-  has_password: boolean;
-  created_at: string;
-  host: { username: string } | null;
-  room_players: RoomPlayer[];
-}
+import ThemeToggle from "@/app/components/ThemeToggle";
+import { Room } from "./types";
+import RoomSection from "./components/RoomSection";
 
 interface Props {
   username: string;
@@ -33,7 +18,6 @@ const MultiLobby = ({ username, initialRooms }: Props) => {
   const router = useRouter();
   const [rooms, setRooms] = useState<Room[]>(initialRooms);
 
-  // Create form
   const [showForm, setShowForm] = useState(false);
   const [roomName, setRoomName] = useState("");
   const [maxPlayers, setMaxPlayers] = useState(6);
@@ -42,8 +26,6 @@ const MultiLobby = ({ username, initialRooms }: Props) => {
   const [isRanked, setIsRanked] = useState(false);
   const [createPassword, setCreatePassword] = useState("");
   const [creating, setCreating] = useState(false);
-
-  // Password prompt for joining
   const [promptRoomId, setPromptRoomId] = useState<string | null>(null);
   const [joinPassword, setJoinPassword] = useState("");
   const [joiningId, setJoiningId] = useState<string | null>(null);
@@ -125,13 +107,16 @@ const MultiLobby = ({ username, initialRooms }: Props) => {
   const playingRooms = rooms.filter((r) => r.status === "playing");
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-950 text-white">
-      <header className="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
-        <Link href="/" className="text-sm text-zinc-400 hover:text-white transition">
+    <div className="flex min-h-screen flex-col bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm text-zinc-900 dark:text-white">
+      <header className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 px-6 py-4">
+        <Link href="/" className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition">
           ← Back
         </Link>
         <span className="font-semibold">Multiplayer</span>
-        <span className="text-sm text-zinc-400">{username}</span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400">{username}</span>
+          <ThemeToggle />
+        </div>
       </header>
 
       <main className="flex flex-1 flex-col items-center px-6 py-12">
@@ -142,7 +127,7 @@ const MultiLobby = ({ username, initialRooms }: Props) => {
             <div className="flex justify-end">
               <button
                 onClick={() => setShowForm(true)}
-                className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold hover:bg-indigo-500 transition"
+                className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition"
               >
                 + Create room
               </button>
@@ -150,7 +135,7 @@ const MultiLobby = ({ username, initialRooms }: Props) => {
           ) : (
             <form
               onSubmit={handleCreate}
-              className="rounded-2xl border border-zinc-700 bg-zinc-900 p-5 space-y-4"
+              className="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 p-5 space-y-4"
             >
               <p className="font-semibold text-sm">New room</p>
               <div className="flex gap-3">
@@ -161,9 +146,9 @@ const MultiLobby = ({ username, initialRooms }: Props) => {
                   onChange={(e) => setRoomName(e.target.value)}
                   maxLength={40}
                   autoFocus
-                  className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-indigo-500"
+                  className="flex-1 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 outline-none focus:border-indigo-500"
                 />
-                <label className="flex items-center gap-2 text-xs text-zinc-400 shrink-0">
+                <label className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 shrink-0">
                   Max
                   <input
                     type="number"
@@ -173,7 +158,7 @@ const MultiLobby = ({ username, initialRooms }: Props) => {
                     onChange={(e) =>
                       setMaxPlayers(Math.min(10, Math.max(2, Number(e.target.value))))
                     }
-                    className="w-14 rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-2 text-sm text-center text-white outline-none focus:border-indigo-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none appearance-none"
+                    className="w-14 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2 py-2 text-sm text-center text-zinc-900 dark:text-white outline-none focus:border-indigo-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none appearance-none"
                   />
                 </label>
               </div>
@@ -184,15 +169,15 @@ const MultiLobby = ({ username, initialRooms }: Props) => {
                   className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition ${
                     isRanked
                       ? "border-amber-600 bg-amber-900/40 text-amber-300"
-                      : "border-zinc-700 bg-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-500"
+                      : "border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-400 dark:hover:border-zinc-500"
                   }`}
                 >
                   {isRanked ? "★ Ranked" : "☆ Ranked"}
                 </button>
-                <span className="text-xs text-zinc-600">Ranked games count towards the leaderboard · 50 words</span>
+                <span className="text-xs text-zinc-400 dark:text-zinc-600">Ranked games count towards the leaderboard · 50 words</span>
               </div>
               <div className="flex gap-3">
-                <label className={`flex items-center gap-2 text-xs ${isRanked ? "text-zinc-600" : "text-zinc-400"}`}>
+                <label className={`flex items-center gap-2 text-xs ${isRanked ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-500 dark:text-zinc-400"}`}>
                   Words
                   <input
                     type="number"
@@ -201,15 +186,15 @@ const MultiLobby = ({ username, initialRooms }: Props) => {
                     value={isRanked ? 50 : wordCount}
                     disabled={isRanked}
                     onChange={(e) => setWordCount(Math.min(100, Math.max(5, Number(e.target.value))))}
-                    className="w-16 rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-2 text-sm text-center text-white outline-none focus:border-indigo-500 disabled:opacity-40 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none appearance-none"
+                    className="w-16 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2 py-2 text-sm text-center text-zinc-900 dark:text-white outline-none focus:border-indigo-500 disabled:opacity-40 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none appearance-none"
                   />
                 </label>
-                <label className="flex items-center gap-2 text-xs text-zinc-400">
+                <label className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
                   Time limit
                   <select
                     value={timeLimit ?? ""}
                     onChange={(e) => setTimeLimit(e.target.value === "" ? null : Number(e.target.value))}
-                    className="rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-2 text-sm text-white outline-none focus:border-indigo-500"
+                    className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2 py-2 text-sm text-zinc-900 dark:text-white outline-none focus:border-indigo-500"
                   >
                     <option value="">None</option>
                     <option value="30">30s</option>
@@ -227,20 +212,20 @@ const MultiLobby = ({ username, initialRooms }: Props) => {
                 value={createPassword}
                 onChange={(e) => setCreatePassword(e.target.value)}
                 maxLength={100}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-indigo-500"
+                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 outline-none focus:border-indigo-500"
               />
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => { setShowForm(false); setRoomName(""); setWordCount(20); setTimeLimit(null); setIsRanked(false); setCreatePassword(""); }}
-                  className="rounded-lg border border-zinc-700 px-4 py-1.5 text-sm text-zinc-400 hover:text-white transition"
+                  className="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-1.5 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creating || !roomName.trim()}
-                  className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-semibold hover:bg-indigo-500 disabled:opacity-50 transition"
+                  className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 transition"
                 >
                   {creating ? "Creating…" : "Create"}
                 </button>
@@ -258,29 +243,29 @@ const MultiLobby = ({ username, initialRooms }: Props) => {
                   setPromptRoomId(null);
                   doJoin(id, joinPassword);
                 }}
-                className="w-full max-w-sm rounded-2xl border border-zinc-700 bg-zinc-900 p-6 space-y-4 mx-4"
+                className="w-full max-w-sm rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 p-6 space-y-4 mx-4"
               >
-                <p className="font-semibold">Enter room password</p>
+                <p className="font-semibold text-zinc-900 dark:text-white">Enter room password</p>
                 <input
                   type="password"
                   placeholder="Password"
                   value={joinPassword}
                   onChange={(e) => setJoinPassword(e.target.value)}
                   autoFocus
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-indigo-500"
+                  className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 outline-none focus:border-indigo-500"
                 />
                 <div className="flex justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => { setPromptRoomId(null); setJoinPassword(""); }}
-                    className="rounded-lg border border-zinc-700 px-4 py-1.5 text-sm text-zinc-400 hover:text-white transition"
+                    className="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-1.5 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={!joinPassword}
-                    className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-semibold hover:bg-indigo-500 disabled:opacity-50 transition"
+                    className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 transition"
                   >
                     Join
                   </button>
@@ -312,84 +297,3 @@ const MultiLobby = ({ username, initialRooms }: Props) => {
 };
 
 export default MultiLobby;
-
-const RoomSection = ({
-  title,
-  rooms,
-  joiningId,
-  onJoin,
-  emptyText,
-}: {
-  title: string;
-  rooms: Room[];
-  joiningId: string | null;
-  onJoin: (room: Room) => void;
-  emptyText?: string;
-}) => {
-  return (
-    <div className="space-y-3">
-      <h2 className="text-xs uppercase tracking-widest text-zinc-500">{title}</h2>
-      {rooms.length === 0 && emptyText ? (
-        <p className="text-sm text-zinc-600">{emptyText}</p>
-      ) : (
-        <div className="divide-y divide-zinc-800 rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden">
-          {rooms.map((room) => {
-            const count = room.room_players[0]?.count ?? 0;
-            const full = count >= room.max_players;
-            return (
-              <div key={room.id} className="flex items-center justify-between px-5 py-4">
-                <div className="min-w-0">
-                  <p className="flex items-center gap-1.5 truncate font-medium text-sm">
-                    {room.has_password && (
-                      <span className="text-zinc-500" title="Password protected">🔒</span>
-                    )}
-                    {room.name}
-                    {room.is_ranked && (
-                      <span className="ml-1 rounded-full border border-amber-700 bg-amber-900/40 px-2 py-0.5 text-xs font-medium text-amber-300">
-                        Ranked
-                      </span>
-                    )}
-                  </p>
-                  <p className="text-xs text-zinc-500 mt-0.5">
-                    by {room.host?.username ?? "—"} ·{" "}
-                    <span className={full ? "text-red-400" : "text-zinc-400"}>
-                      {count}/{room.max_players} players
-                    </span>
-                    {" · "}{room.word_count}w
-                    {room.time_limit != null && ` · ${room.time_limit >= 60 ? `${room.time_limit / 60}min` : `${room.time_limit}s`}`}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3 shrink-0 ml-4">
-                  <StatusBadge status={room.status} />
-                  {room.status === "waiting" && (
-                    <button
-                      onClick={() => onJoin(room)}
-                      disabled={full || joiningId === room.id}
-                      className="rounded-lg border border-zinc-700 px-4 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white hover:border-zinc-500 disabled:opacity-40 transition"
-                    >
-                      {joiningId === room.id ? "Joining…" : full ? "Full" : "Join"}
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const StatusBadge = ({ status }: { status: Room["status"] }) => {
-  const styles = {
-    waiting: "bg-emerald-900/50 text-emerald-400 border-emerald-800",
-    playing: "bg-amber-900/50 text-amber-400 border-amber-800",
-    finished: "bg-zinc-800 text-zinc-500 border-zinc-700",
-  };
-  const labels = { waiting: "Waiting", playing: "Playing", finished: "Done" };
-  return (
-    <span className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${styles[status]}`}>
-      {labels[status]}
-    </span>
-  );
-};

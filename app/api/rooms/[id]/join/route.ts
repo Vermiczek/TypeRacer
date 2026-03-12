@@ -25,7 +25,6 @@ export const POST = async (
   const body = await request.json().catch(() => ({}));
   const password: string | undefined = body?.password;
 
-  // Fetch room with current player count
   const { data: room, error: roomError } = await supabase
     .from("rooms")
     .select("id, status, max_players, password_hash, room_players(count)")

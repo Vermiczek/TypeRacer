@@ -7,6 +7,11 @@ import {
   countCorrectChars,
   getCharStates,
 } from "@/lib/metrics";
+import StatCard from "./StatCard";
+import ProgressBar from "./ProgressBar";
+import TextDisplay from "./TextDisplay";
+import GameInput from "./GameInput";
+import ResultPanel from "./ResultPanel";
 
 export interface GameResult {
   wpm: number;
@@ -106,19 +111,14 @@ const TypingGame = ({
     }
   };
 
-  // Live metrics
   const elapsed = startTimeRef.current
     ? Math.max(1, (Date.now() - startTimeRef.current) / 1000)
     : 0;
   const liveCorrectChars = countCorrectChars(typed, sentence);
   const liveWpm = status === "playing" ? calcWpm(liveCorrectChars, elapsed) : 0;
-  const liveAccuracy =
-    status === "playing" ? calcAccuracy(typed, sentence) : 1;
-
+  const liveAccuracy = status === "playing" ? calcAccuracy(typed, sentence) : 1;
   const charStates = getCharStates(typed, sentence);
   const progress = Math.round((typed.length / sentence.length) * 100);
-
-  // Windowed line layout
   const words = sentence.split(" ");
   const lines: string[] = [];
   for (let i = 0; i < words.length; i += WORDS_PER_LINE) {
@@ -134,7 +134,6 @@ const TypingGame = ({
 
   return (
     <div className="w-full max-w-2xl space-y-8">
-      {/* Stats bar */}
       <div className="grid grid-cols-3 gap-4">
         <StatCard
           label="WPM"
@@ -153,120 +152,37 @@ const TypingGame = ({
         />
       </div>
 
-      {/* Progress bar */}
-      <div className="h-1 w-full overflow-hidden rounded-full bg-zinc-800">
-        <div
-          className="h-full rounded-full bg-indigo-500 transition-all duration-150"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+      <ProgressBar progress={progress} />
 
-      {/* Typing area */}
-      <div
-        className="cursor-text rounded-2xl border border-zinc-800 bg-zinc-900 px-6 py-5 overflow-hidden"
-        onClick={() => inputRef.current?.focus()}
-      >
-        <div className="space-y-3">
-          {[-1, 0, 1].map((offset) => {
-            const lineIdx = currentLineIndex + offset;
-            if (lineIdx < 0 || lineIdx >= lines.length) {
-              return <div key={offset} className="h-8" />;
-            }
-            const lineStart = lineStartChars[lineIdx];
-            const isCurrent = offset === 0;
-            return (
-              <p
-                key={offset}
-                className={`font-mono text-xl leading-relaxed tracking-wide transition-opacity duration-150 ${
-                  isCurrent ? "opacity-100" : "opacity-25"
-                }`}
-              >
-                {lines[lineIdx].split("").map((char, j) => {
-                  const globalIdx = lineStart + j;
-                  const state = charStates[globalIdx];
-                  const isCursor =
-                    globalIdx === typed.length && status !== "finished";
-                  return (
-                    <span
-                      key={j}
-                      className={[
-                        state === "correct" && "text-emerald-400",
-                        state === "incorrect" && "bg-red-900/60 text-red-400",
-                        state === "pending" && "text-zinc-500",
-                        isCursor && "border-b-2 border-indigo-400",
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                    >
-                      {char}
-                    </span>
-                  );
-                })}
-              </p>
-            );
-          })}
-        </div>
-      </div>
+      <TextDisplay
+        lines={lines}
+        lineStartChars={lineStartChars}
+        currentLineIndex={currentLineIndex}
+        charStates={charStates}
+        typedLength={typed.length}
+        isFinished={status === "finished"}
+        onFocus={() => inputRef.current?.focus()}
+      />
 
-      {/* Input / Results */}
       {status !== "finished" ? (
-        <div className="space-y-3">
-          <input
-            ref={inputRef}
-            type="text"
-            value={typed}
-            onChange={handleInput}
-            disabled={disabled}
-            placeholder={status === "idle" ? "Start typing to begin…" : undefined}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 font-mono text-base text-white placeholder-zinc-500 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:opacity-50"
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-          />
-          {controls && <div className="flex items-center justify-between gap-2">{controls}</div>}
-        </div>
+        <GameInput
+          inputRef={inputRef}
+          value={typed}
+          onChange={handleInput}
+          disabled={disabled}
+          isIdle={status === "idle"}
+          controls={controls}
+        />
       ) : (
-        <div className="rounded-2xl border border-zinc-700 bg-zinc-900 p-6 text-center space-y-4">
-          {newBest && (
-            <p className="text-sm font-semibold text-amber-400">
-              New personal best!
-            </p>
-          )}
-          <p className="text-2xl font-bold">
-            {finalWpm} WPM · {Math.round(finalAccuracy * 100)}% accuracy
-          </p>
-          {resultActions && (
-            <div className="flex justify-center gap-3">{resultActions}</div>
-          )}
-        </div>
+        <ResultPanel
+          wpm={finalWpm}
+          accuracy={finalAccuracy}
+          newBest={newBest}
+          resultActions={resultActions}
+        />
       )}
     </div>
   );
 };
 
 export default TypingGame;
-
-const StatCard = ({
-  label,
-  value,
-  sub,
-  highlight,
-}: {
-  label: string;
-  value: string | number;
-  sub?: string;
-  highlight?: boolean;
-}) => {
-  return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-center">
-      <p className="mb-1 text-xs uppercase tracking-widest text-zinc-500">{label}</p>
-      <p
-        className={`text-2xl font-bold tabular-nums ${highlight ? "text-amber-400" : "text-white"}`}
-      >
-        {value}
-      </p>
-      {sub && <p className="mt-1 text-xs text-zinc-500">{sub}</p>}
-    </div>
-  );
-};

@@ -36,7 +36,6 @@ export const POST = async (
     .eq("room_id", roomId)
     .eq("player_id", user.id);
 
-  // Check if all players in this room have finished
   const { data: unfinished } = await supabase
     .from("room_players")
     .select("player_id", { count: "exact", head: false })
@@ -50,7 +49,6 @@ export const POST = async (
       .eq("id", roomId);
   }
 
-  // Update leaderboard stats only for ranked rooms with a real finish (non-DNF)
   if (wpm !== null && accuracy !== null) {
     const { data: room } = await supabase
       .from("rooms")
