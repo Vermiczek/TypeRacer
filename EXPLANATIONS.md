@@ -26,3 +26,4 @@ Initially I considered largely skipping this part, it is a bit of a hassle to ha
 1. Some way to monetize the project. Perhaps some non-invasive ads on the side of the view, perhaps some microtransactions or premium accounts (but I dont know what benefits would such accounts get).
 2. User panel - allow user to reset their passwords, change their avatars etc. Generally more user management capabilities would be required. 
 3. Localization - using i18n probably. Also, the wordbase should be expanded by words of different languages and users should be allowed to choose. 
+4. OAuth - self-explanatory. 
