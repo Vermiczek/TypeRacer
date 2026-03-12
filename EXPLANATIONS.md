@@ -20,7 +20,7 @@ Initially I considered largely skipping this part, it is a bit of a hassle to ha
 5. E2E tests - I skipped those, there was no time, but it is a great way to approach the "test as much as possible with as little code as possible" goal. Definitely a good idea to go with those in startups, but a good unit test coverage is also great to have. 
 6. Multiplayer part - supervised AI usage was definitely more extensive here as it is a very complicated feature that would probably take up at least a few days of non-AI-supported dev time to do correctly. It is fairly barebones and buggy, but seems to work in many cases. A lot would need to be added here, such as handling the room owner, giving him more tools to handle the players that join. Overall it kinda works sometimes at its curent state but needs work. 
 7. Scoreboard - a simple functionality. I added a "ranked" option to kind of standardise the ranking system (making it so only ranked multiplayer game scores are used for the scoreboards). Honestly for it to make sense some more complex ranking system would need to be applied and I did not have the time to implement any, though I did have some ideas. 
-8
+8. Readme - admittedly AI wrote the entirety of it. 
 
 ## Should be added
 1. Some way to monetize the project. Perhaps some non-invasive ads on the side of the view, perhaps some microtransactions or premium accounts (but I dont know what benefits would such accounts get).
